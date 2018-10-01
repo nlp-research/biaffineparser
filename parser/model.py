@@ -524,8 +524,8 @@ def add_biaffine_layer(input1, W, input2, device, num_outputs=1, bias_x=False, b
 
 def bilstm_layer(inputs, sequence_length, num_units):
     cell = tf.nn.rnn_cell.GRUCell
-    cell_fw = cell(num_units, state_is_tuple=True)
-    cell_bw = cell(num_units, state_is_tuple=True)
+    cell_fw = cell(num_units)
+    cell_bw = cell(num_units)
     _, ((_, output_fw), (_, output_bw)) = tf.nn.bidirectional_dynamic_rnn(
         cell_fw, cell_bw,
         inputs, sequence_length=sequence_length,
