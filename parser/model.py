@@ -416,7 +416,7 @@ class Model(object):
 
 
 def add_stacked_lstm_layers(hparams, word_embedding, lengths, dropout):
-    cell = tf.contrib.rnn.LSTMCell
+    cell = tf.nn.rnn_cell.GRUCell
     cells_fw = [cell(hparams.num_lstm_units)
                 for _ in range(hparams.num_lstm_layers)]
     cells_bw = [cell(hparams.num_lstm_units)
@@ -523,7 +523,7 @@ def add_biaffine_layer(input1, W, input2, device, num_outputs=1, bias_x=False, b
 
 
 def bilstm_layer(inputs, sequence_length, num_units):
-    cell = tf.contrib.rnn.LSTMCell
+    cell = tf.nn.rnn_cell.GRUCell
     cell_fw = cell(num_units, state_is_tuple=True)
     cell_bw = cell(num_units, state_is_tuple=True)
     _, ((_, output_fw), (_, output_bw)) = tf.nn.bidirectional_dynamic_rnn(

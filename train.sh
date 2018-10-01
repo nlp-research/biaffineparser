@@ -4,7 +4,7 @@
 ############## START ###################
 train_filename=data/sejong.char.train.csv # Path of train dataset.
 dev_filename=data/sejong.char.test.csv # Path of dev dataset.
-out_dir=parser/model_parser # Store log/model files.
+out_dir=parser/model_iss81 # Store log/model files.
 word_embed_file=embeddings/words.pos.original.vec  # Use the pre-trained embedding. If not provided, use random values.
 pos_embed_file= #embeddings/words.tag.original.vec  # Use the pre-trained embedding. If not provided, use random values.
 char_embed_file= # Use the pre-trained embedding. If not provided, use random values.
@@ -13,6 +13,8 @@ embed_dropout=0.33
 word_embed_size=200  # The embedding dimension for the word's embedding.
 pos_embed_size=100  # The embedding dimension for the tag's embedding.
 char_embed_size=200 # The embedding dimension for the character's embedding.
+arc_mlp_units=600
+label_mlp_units=200
 num_train_epochs=50 # Num epochs to train.
 batch_size=128  # Batch size.
 inference_input_file= #data/sejong.char.train.csv
@@ -42,6 +44,8 @@ python -m parser.parser \
     --word_embed_size=${word_embed_size} \
     --pos_embed_size=${pos_embed_size} \
     --char_embed_size=${char_embed_size}  \
+    --arc_mlp_units=${arc_mlp_units} \
+    --label_mlp_units=${label_mlp_units} \
     --num_train_epochs=${num_train_epochs} \
     --batch_size=${batch_size} \
     --inference_input_file=${inference_input_file} \
