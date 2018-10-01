@@ -228,10 +228,16 @@ class Model(object):
             arc_logits3 = add_biaffine_layer(
                 self.h_label_dep, W_arc3, self.h_arc_head, self.hparams.device, num_outputs=1, bias_x=True, bias_y=False)
 
-            self.arc_logits = tf.add(
-                tf.divide(arc_logits, 3),
-                tf.divide(arc_logits2, 3) + tf.divide(arc_logits3, 3),
-                name='arc_logits')
+            arc_logits_concat = tf.concat([arc_logits, arc_logits2, arc_logits3], axis=-1)
+            num_units = tf.shape(arc_logits)[-1]
+            # self.arc_logits = tf.add(
+            #     tf.divide(arc_logits, 3),
+            #     tf.divide(arc_logits2, 3) + tf.divide(arc_logits3, 3),
+            #     name='arc_logits')
+            self.arc_logits = bilstm_layer(arc_logits_concat,
+                                           self.sequence_length,
+                                           int(num_units / 2),
+                                           only_final=False)
 
         with tf.variable_scope('label'):
             W_label = tf.get_variable('w_label', [self.mlp_out_size + 1, self.n_classes,
@@ -522,13 +528,16 @@ def add_biaffine_layer(input1, W, input2, device, num_outputs=1, bias_x=False, b
     return blin
 
 
-def bilstm_layer(inputs, sequence_length, num_units):
+def bilstm_layer(inputs, sequence_length, num_units, only_final=True):
     cell = tf.contrib.rnn.LSTMCell
     cell_fw = cell(num_units, state_is_tuple=True)
     cell_bw = cell(num_units, state_is_tuple=True)
-    _, ((_, output_fw), (_, output_bw)) = tf.nn.bidirectional_dynamic_rnn(
+    outputs, ((_, output_fw), (_, output_bw)) = tf.nn.bidirectional_dynamic_rnn(
         cell_fw, cell_bw,
         inputs, sequence_length=sequence_length,
         dtype=tf.float32)
-    final_states = tf.concat([output_fw, output_bw], axis=-1)
-    return final_states
+    if only_final:
+        final_states = tf.concat([output_fw, output_bw], axis=-1)
+        return final_states
+    else:
+        return outputs
