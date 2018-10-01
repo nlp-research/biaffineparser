@@ -526,9 +526,9 @@ def bilstm_layer(inputs, sequence_length, num_units):
     cell = tf.nn.rnn_cell.GRUCell
     cell_fw = cell(num_units)
     cell_bw = cell(num_units)
-    _, ((_, output_fw), (_, output_bw)) = tf.nn.bidirectional_dynamic_rnn(
+    _, output_states = tf.nn.bidirectional_dynamic_rnn(
         cell_fw, cell_bw,
         inputs, sequence_length=sequence_length,
         dtype=tf.float32)
-    final_states = tf.concat([output_fw, output_bw], axis=-1)
+    final_states = tf.concat(output_states, axis=2)
     return final_states
