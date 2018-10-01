@@ -530,5 +530,5 @@ def bilstm_layer(inputs, sequence_length, num_units):
         cell_fw, cell_bw,
         inputs, sequence_length=sequence_length,
         dtype=tf.float32)
-    final_states = tf.concat(output_states, axis=2)
+    final_states = tf.concat(output_states, axis=1)
     return final_states
