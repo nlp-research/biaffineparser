@@ -26,7 +26,7 @@ echo "building train_data DONE"
 #종료
 exit 0
 
-#창원대 데이처 추가시
+#데이처 추가시
 echo "building train_data with changwon and appending"
 python -m parser.build_data \
     --input_file=raw/changwon_dep-2.txt \
