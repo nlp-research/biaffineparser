@@ -90,7 +90,7 @@ def load_dataset(filepath, flags):
             f'Saving dataset_multiindex_file... : {dataset_multiindex_filepath}')
         save_vocab((sentences, chars, pos, rels, heads,
                 maxlen, maxwordlen, maxcharlen), dataset_multiindex_filepath)
-    
+
     #사전을 늘리기 위해 평가데이터도 읽어들이기
     print('also reading validation dataset for creating dictionary')
     (val_sentences, val_chars, val_pos, _, _, _, _, _) = get_dataset_multiindex(flags.dev_filename)
