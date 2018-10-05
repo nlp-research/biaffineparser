@@ -303,7 +303,7 @@ def cast_safe_list(elem):
 
 def get_dataset_multiindex(filepath):
     print_out(f'Load dataset... {filepath}')
-    dataset = pd.read_csv(filepath, sep='\t', quoting=csv.QUOTE_NONE)
+    dataset = pd.read_csv(filepath, sep='\t', quoting=csv.QUOTE_NONE, na_filter=False)
     # Process to make eoj string
     dataset['eoj'] = dataset['eoj'].apply(lambda x: str(x))
     # Process to make head_id float
