@@ -22,6 +22,8 @@ def get_dataset_from_sentence(analyzed_input):
     return [single_sent], [single_pos], [single_chars], maxlen, maxwordlen, maxcharlen
 
 if __name__ == '__main__':
-    
+
+    result = get_dataset_from_sentence('아버지/NNG + 가/JKS 방/NNG 에/JKM + 들어가/VV 시/EPH ㄴ다/EFN')
+    print(result)
     exit()
     
