@@ -18,11 +18,12 @@ def add_arguments(parser):
                         help="host to run morph analyzer server")
     parser.add_argument('--port', type=int, default=9000,
                         help="port to run morph analyzer server")
-
+#hello world
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
 
+#analyze morph
 @app.route('/morph/analyze', methods=['POST', 'GET'])
 def analyze():
     tagger = Kkma()
