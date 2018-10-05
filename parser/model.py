@@ -8,7 +8,8 @@ from . import utils
 
 class Model(object):
     def __init__(self, hparams, word_vocab_table, char_vocab_table, pos_vocab_table,
-                 rels_vocab_table, heads_vocab_table, word_embedding, char_embedding, pos_embedding):
+                 rels_vocab_table, heads_vocab_table, word_embedding, char_embedding, pos_embedding,
+                 mode='train'):
         print('#'*30)
         print(f'word_vocab_table: {len(word_vocab_table)}')
         print(f'char_vocab_table: {len(char_vocab_table)}')
@@ -45,6 +46,14 @@ class Model(object):
         self.train_mode = tf.contrib.learn.ModeKeys.TRAIN
         self.eval_mode = tf.contrib.learn.ModeKeys.EVAL
         self.infer_mode = tf.contrib.learn.ModeKeys.INFER
+        if mode == 'train':
+            self.mode = self.train_mode
+        elif mode == 'eval':
+            self.mode = self.eval_mode
+        elif mode == 'infer':
+            self.mode = self.infer_mode
+        else:
+            ValueError('Invalid mode')
 
         self.global_step = tf.Variable(0, trainable=False, name='global_step')
 
@@ -56,8 +65,9 @@ class Model(object):
         self.create_lstm_layer()
         self.create_mlp_layer()
         self.create_biaffine_layer()
-        self.create_loss_op()
-        self.create_train_op()
+        if self.mode == self.train_mode or self.mode == self.eval_mode:
+            self.create_loss_op()
+            self.create_train_op()
         self.create_uas_and_las_op()
 
     def build(self):
@@ -85,6 +95,7 @@ class Model(object):
         self.sess = tf.Session()
         saver = tf.train.Saver()
         saver.restore(self.sess, save_path)
+        self.mode = self.train_mode
 
     def create_placeholders(self):
         # word_ids, pos_ids shape: (?,?,?) => (batch_size, sequence_words, word_morphs)
@@ -100,10 +111,11 @@ class Model(object):
         self.pos_ids = tf.placeholder(
             tf.int32, shape=[None, None, None], name='pos_ids')
 
-        self.head_ids = tf.placeholder(
-            tf.int32, shape=[None, None], name='head_ids')
-        self.rel_ids = tf.placeholder(
-            tf.int32, shape=[None, None], name='rel_ids')
+        if self.mode == self.train_mode:
+            self.head_ids = tf.placeholder(
+                tf.int32, shape=[None, None], name='head_ids')
+            self.rel_ids = tf.placeholder(
+                tf.int32, shape=[None, None], name='rel_ids')
         self.sequence_length = tf.placeholder(
             tf.int32, shape=[None], name='sequence_length')
         self.word_length = tf.placeholder(
@@ -240,6 +252,10 @@ class Model(object):
                                                    self.hparams.device, num_outputs=self.n_classes, bias_x=True, bias_y=True)  # [batch,seq_length,heads,label_classes]
 
             # turn off the padding tensor to false
+            if self.mode == self.eval_mode or self.mode == self.infer_mode:
+                head_preds = tf.argmax(
+                    self.arc_logits, axis=-1, output_type=tf.int32)
+                self.head_ids = head_preds
             gold_heads = self.head_ids
             mask = tf.cast(tf.not_equal(
                 gold_heads, self.head_pad_id), dtype=tf.int32)
@@ -306,21 +322,23 @@ class Model(object):
                 self.arc_logits, axis=-1, output_type=tf.int32)
             self.masked_head_preds = tf.boolean_mask(
                 self.head_preds[:, 1:], sequence_mask[:, 1:])
-            masked_head_ids = tf.boolean_mask(
-                self.head_ids[:, 1:], sequence_mask[:, 1:])
-            head_correct = tf.equal(self.masked_head_preds, masked_head_ids)
-            self.uas = tf.reduce_mean(tf.cast(head_correct, tf.float32))
+            if self.mode == self.train_mode or self.mode == self.eval_mode:
+                masked_head_ids = tf.boolean_mask(
+                    self.head_ids[:, 1:], sequence_mask[:, 1:])
+                head_correct = tf.equal(self.masked_head_preds, masked_head_ids)
+                self.uas = tf.reduce_mean(tf.cast(head_correct, tf.float32))
 
         with tf.variable_scope('las'):
             self.rel_preds = tf.argmax(
                 self.label_logits, axis=-1, output_type=tf.int32)
             self.masked_rel_preds = tf.boolean_mask(
                 self.rel_preds[:, 1:], sequence_mask[:, 1:])
-            masked_rel_ids = tf.boolean_mask(
-                self.rel_ids[:, 1:], sequence_mask[:, 1:])
-            rel_correct = tf.equal(self.masked_rel_preds, masked_rel_ids)
-            head_rel_correct = tf.logical_and(head_correct, rel_correct)
-            self.las = tf.reduce_mean(tf.cast(head_rel_correct, tf.float32))
+            if self.mode == self.train_mode or self.mode == self.eval_mode:
+                masked_rel_ids = tf.boolean_mask(
+                    self.rel_ids[:, 1:], sequence_mask[:, 1:])
+                rel_correct = tf.equal(self.masked_rel_preds, masked_rel_ids)
+                head_rel_correct = tf.logical_and(head_correct, rel_correct)
+                self.las = tf.reduce_mean(tf.cast(head_rel_correct, tf.float32))
 
     def merge_summaries_and_create_writer(self, sess):
         self.summary = tf.summary.merge_all()
