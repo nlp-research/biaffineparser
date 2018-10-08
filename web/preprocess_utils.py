@@ -1,29 +1,30 @@
 import re
 
-def get_dataset_from_sentence(analyzed_input):
+def get_dataset_from_sentence(analyzed_input, eoj_delim=' + ', morph_delim=' '):
 
     maxlen = 0
     maxwordlen = 0
     maxcharlen = 0
 
-    single_sent = ['ROOT_START']
-    single_chars = ['ROOT_START']
-    single_pos = ['ROOT_START']
+    sent_tokens = ['ROOT_START']
+    char_tokens = ['ROOT_START']
+    pos_tokens = ['ROOT_START']
     
-    eojs = analyzed_input.split(' + ')
+    #어절 분할
+    eojs = analyzed_input.split(eoj_delim)
+    sent_tokens = [eoj.replace(morph_delim, '|') for eoj in eojs] #형태소/태그
+    pos_tokens = ['|'.join([morph.rsplit('/', 1)[1] for morph in eoj.split(morph_delim)]) for eoj in eojs] #태그
+    char_tokens = ['|'.join(['|'.join(morph.rsplit('/', 1)[0]) for morph in eoj.split(morph_delim)]) for eoj in eojs] #음절
     
-    single_sent = [eoj.replace(' ', '|') for eoj in eojs]
-    single_pos = ['|'.join([morph.rsplit('/', 1)[1] for morph in eoj.split(' ')]) for eoj in eojs]
-    single_chars = ['|'.join(['|'.join(morph.rsplit('/', 1)[0]) for morph in eoj.split(' ')]) for eoj in eojs]
-    maxlen = len(single_sent)
-    maxwordlen = max([len(eoj.split('|')) for eoj in single_sent])
-    maxcharlen = max([len(chars.split('|')) for chars in single_chars])
+    maxlen = len(eojs) #최대 어절 길이
+    maxwordlen = max([len(eoj.split('|')) for eoj in sent_tokens]) # 최대 형태소 개수
+    maxcharlen = max([len(chars.split('|')) for chars in char_tokens]) #최대 음절 개수
     
-    return [single_sent], [single_pos], [single_chars], maxlen, maxwordlen, maxcharlen
+    return [sent_tokens], [pos_tokens], [char_tokens], maxlen, maxwordlen, maxcharlen
 
 if __name__ == '__main__':
 
-    result = get_dataset_from_sentence('아버지/NNG + 가/JKS 방/NNG 에/JKM + 들어가/VV 시/EPH ㄴ다/EFN')
+    result = get_dataset_from_sentence('형태소/NNG 를/JKO + 입력/NNG 하/XSV ㄹ게/EFN + 좀/MAG + 변환/NNG 하/XSV 어/ECS 주/VXV 어/ECS')
     print(result)
     exit()
     

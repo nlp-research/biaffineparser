@@ -37,7 +37,6 @@ def analyze():
     else:
         sentence = request.json.get('sentence', '')
     pos_result = tagger.pos(sentence, flatten=False, join=True)
-    pos_result = ['+'.join(s) for s in pos_result]
     return jsonify(pos_result)
 
 if __name__ == '__main__':
