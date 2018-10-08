@@ -47,7 +47,8 @@ class BiaffineParser(object):
         self.model.new_sess_and_restore(
             os.path.join(flags.out_dir, 'parser.ckpt'))
 
-    def parse(self, sentence):
+    def parse(self, sentence, preprocessor):
+        """
         sentences = [['ROOT_START', '내/NP|가/JKS', '사건/NNG|들/XSN|을/JKO',
                       '어거/NNG|(/SS|馭/SH|車/SH|)/SS|하/XSV|아/EC', '오/VX|았/EP|다고/EC|는/JX', '주장/NNG|하/XSV|ㄹ/ETM', '수/NNB', '없/VA|습니다/EF|./SF']]
         pos = [['ROOT_START', 'NP|JKS', 'NNG|XSN|JKO', 'NNG|SS|SH|SH|SS|XSV|EC',
@@ -57,6 +58,9 @@ class BiaffineParser(object):
         maxlen = 8
         maxwordlen = 7
         maxcharlen = 8
+        """
+        sentences, pos, chars, maxlen, maxwordlen, maxcharlen = preprocessor(
+            sentence)
 
         sentences_indexed = utils.get_indexed_sequences(
             sentences, self.words_dict, maxlen, maxwordl=maxwordlen, split_word=True)

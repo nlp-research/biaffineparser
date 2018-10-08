@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import argparse
 import json
+from parser.biaffineparser import BiaffineParser
 
 from flask import Flask, jsonify, request
-from parser.biaffineparser import BiaffineParser
+
+from web.preprocess_utils import get_dataset_from_sentence
 
 app = Flask(__name__)
 app.json_encoder.ensure_ascii = True
@@ -29,8 +31,10 @@ def hello_world():
 
 @app.route('/sample')
 def sample():
-    arc, label = parser.parse('')
-    result = {'arc': arc.tolist(), 'label': label}
+    sentence = '형태소/NNG 를/JKO + 입력/NNG 하/XSV ㄹ게/EFN + 좀/MAG + 변환/NNG 하/XSV 어/ECS 주/VXV 어/ECS'
+    arc, label = parser.parse(
+        sentence, get_dataset_from_sentence)
+    result = {'sentence': sentence, 'arc': arc.tolist(), 'label': label}
     return jsonify(result)
 
 
@@ -45,8 +49,10 @@ def parse():
             return f'Error: {e}'
     else:
         sentence = request.json.get('sentence', '')
-    arc, label = parser.parse(sentence)
-    result = {'arc': arc.tolist(), 'label': label}
+    arc, label = parser.parse(
+        sentence,
+        get_dataset_from_sentence)
+    result = {'sentence': sentence, 'arc': arc.tolist(), 'label': label}
     return jsonify(result)
 
 
