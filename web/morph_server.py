@@ -18,11 +18,12 @@ def add_arguments(parser):
                         help="host to run morph analyzer server")
     parser.add_argument('--port', type=int, default=9000,
                         help="port to run morph analyzer server")
-
+#hello world
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
 
+#analyze morph
 @app.route('/morph/analyze', methods=['POST', 'GET'])
 def analyze():
     tagger = Kkma()
@@ -36,7 +37,6 @@ def analyze():
     else:
         sentence = request.json.get('sentence', '')
     pos_result = tagger.pos(sentence, flatten=False, join=True)
-    pos_result = ['+'.join(s) for s in pos_result]
     return jsonify(pos_result)
 
 if __name__ == '__main__':
