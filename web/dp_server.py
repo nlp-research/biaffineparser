@@ -38,7 +38,7 @@ def sample():
     return jsonify(result)
 
 
-@app.route('/dp', methods=['POST', 'GET'])
+@app.route('/dp', methods=['POST'])
 def parse():
     if request.method == 'GET':
         try:
