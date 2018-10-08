@@ -13,6 +13,8 @@ embed_dropout=0.33
 word_embed_size=200  # The embedding dimension for the word's embedding.
 pos_embed_size=100  # The embedding dimension for the tag's embedding.
 char_embed_size=200 # The embedding dimension for the character's embedding.
+arc_mlp_units=600
+label_mlp_units=200
 num_train_epochs=50 # Num epochs to train.
 batch_size=128  # Batch size.
 inference_input_file= #data/sejong.char.train.csv
@@ -42,6 +44,8 @@ python -m parser.parser \
     --word_embed_size=${word_embed_size} \
     --pos_embed_size=${pos_embed_size} \
     --char_embed_size=${char_embed_size}  \
+    --arc_mlp_units=${arc_mlp_units} \
+    --label_mlp_units=${label_mlp_units} \
     --num_train_epochs=${num_train_epochs} \
     --batch_size=${batch_size} \
     --inference_input_file=${inference_input_file} \
